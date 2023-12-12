@@ -4,7 +4,7 @@ import env from "dotenv";
 env.config();
 // DB connection for Atlas
 const userName = process.env.USER_NAME || "msaranyanirmala";
-const password = process.env.PASSWORD || "jvy2IE1KgAFACjLW";
+const password = process.env.PASSWORDDB || "jvy2IE1KgAFACjLW";
 const cluster = process.env.CLUSTER || "cluster0.j5rdv22.mongodb.net";
 const dbName = process.env.DB_NAME || "Capstone";
 
