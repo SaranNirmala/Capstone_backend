@@ -1,111 +1,105 @@
 import Express from "express";
 import { inputModel } from "../db/models.js";
 import multer from "multer";
-
+import { v4 } from "uuid";
 
 export const inputRouter = Express.Router();
+// Using Multer for Imgae Uploading
+// const storage =multer.diskStorage({
+//     destination: (req, file, cb) =>{
+//         cb(null, 'uploadImages/');
+//     },
+//     filename: (req, file, cb) =>{
+//         cb(null, Date.now() + "-"+file.originalname);
+//     }
+// })
 
-const storage =multer.diskStorage({
-    destination: (req, file, cb) =>{
-        cb(null, 'uploadImages/');
-    },
-    filename: (req, file, cb) =>{
-        cb(null, Date.now() + "-"+file.originalname);   
-    }
-})
+// const upload= multer({
+//     storage: storage
+// })
 
-const upload= multer({
-    storage: storage
-})
-
-
-
-
-inputRouter.get('/' , async(req, res) =>{
-    
-try{
+//  Get all the data from DB
+inputRouter.get("/", async (req, res) => {
+  try {
     const inputData = await inputModel.find({});
-    // const imagename= req.files; 
-    if(inputData){
-        res.send(inputData)
+    // const imagename= req.files;
+    if (inputData) {
+      res.send(inputData);
     } else {
-        res.send("Not Received!");
+      res.send("Not Received!");
     }
-} catch(e){
+  } catch (e) {
     console.error("Error", e);
-}
+  }
 });
 
-inputRouter.get('/:id' , async(req, res) =>{
-    const payload = req.body;
-    const id = req.params.id; 
-    console.log(id);
-    console.log(payload);
-    
-    try{
-        const inputData = await inputModel.findOne({id:id});
-        if(inputData){
-            res.send(inputData)
-        } else {
-            res.send("Not Received!");
-        }
-    } catch(e){
-        console.error("Error", e);
+//  Get single data from DB using ID
+inputRouter.get("/:id", async (req, res) => {
+  const payload = req.body;
+  const id = req.params.id;
+
+  try {
+    const inputData = await inputModel.findOne({ id: id });
+    if (inputData) {
+      res.send(inputData);
+    } else {
+      res.send({ msg: "Not Received!" });
     }
-    });
-
-
-
-inputRouter.post('/',upload.single('images') ,async(req, res) => {
-    const payload=req.body;
-    const imagePath=req.files.path;
-    console.log(payload);
-  try{
-    const data= await inputModel.create({...payload, filename:imagePath, path:imagePath});
-        if(data){
-           res.send(data);
-        } else{
-            res.send('error creating');
-        }
-  } catch(err){
-    console.log(err);
-    
-   
+  } catch (e) {
+    console.error("Error", e);
   }
-}
-) 
+});
 
-inputRouter.put('/:email' , async(req, res) => {
-    const payload = req.body;    //postman 
-    console.log(payload);
-    const email=req.params.email;
-    try{
-        const url=await inputModel.findOne({email:email});
-        if(url) {
-            const updateData= await inputModel.findOneAndUpdate({email:email}, {...payload});
-            res.send("Updated");
-        } else{
-             res.send("Invalid");
-        } } 
-    catch(error){
-      console.error(error);
+// upload.array('images',1) - filename:filename, path:path,
+//  create the data and store the DB
+inputRouter.post("/", async (req, res) => {
+  // const {filename, path}=req.files[0];
+  const payload = req.body;
+  try {
+    const data = await inputModel.create({ ...payload });
+    if (data) {
+      res.status(200).send(data);
+    } else {
+      res.send({ use: "error creating" });
     }
-})
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
 
-inputRouter.delete('/:id', async(req, res) => {
-    const  payload =req.body;
-    const id=req.params.id;
-
-    try{
-        const deleteData= await inputModel.findOneAndDelete({id:id});
-           if(deleteData){
-            res.send("data deleted");
-        } else {
-            res.send("data not found");
-        }
-
-    } catch(err){
-        res.status(500).send("Delete data failed");
+// update the data using ID
+inputRouter.put("/:id", async (req, res) => {
+  const payload = req.body; //postman
+  const id = req.params.id;
+  try {
+    const url = await inputModel.findOne({ id: id });
+    if (url) {
+      const updateData = await inputModel.findOneAndUpdate(
+        { id: id },
+        { ...payload }
+      );
+      res.send({ msg: "Updated" });
+    } else {
+      res.send({ msg: "Invalid" });
     }
-})
+  } catch (error) {
+    console.error(error);
+  }
+});
 
+// detale the data using ID
+inputRouter.delete("/:id", async (req, res) => {
+  const payload = req.body;
+  const id = req.params.id;
+  try {
+    const deleteData = await inputModel.findOneAndDelete({ id: id });
+    if (deleteData) {
+      res.send("data deleted");
+    } else {
+      res.send("data not found");
+    }
+  } catch (err) {
+    res.status(500).send("Delete data failed");
+  }
+});
