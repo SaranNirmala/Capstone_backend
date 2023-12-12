@@ -15,7 +15,7 @@ const localDb = "mongodb://localhost:27017/DynamicPortfolio";
 
 export const connectToDb = async () => {
   try {
-    const connect = await mongoose.connect(localDb);
+    const connect = await mongoose.connect(atlasURL);
     if (connect) {
       console.log("Db Connected Successfully");
     }
